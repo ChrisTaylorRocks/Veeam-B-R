@@ -14,8 +14,8 @@
         $APPS = Get-WmiObject -Class win32_product -Filter "vendor LIKE 'Veeam%' AND NOT name LIKE 'Veeam ONE%'" 
         while ($($APPS.count) -gt 0)
         {
-            #Start-Process -FilePath msiexec.exe -ArgumentList "/x {A9DA3FE1-997F-4956-B43D-6B67610E35E6} /qn"
-            #Start-Process -FilePath msiexec.exe -ArgumentList "/x {52EC4366-FF56-4B08-817F-7797C72397A0} /qn"
+            Start-Process -FilePath msiexec.exe -ArgumentList "/x {A9DA3FE1-997F-4956-B43D-6B67610E35E6} /qn"
+            Start-Process -FilePath msiexec.exe -ArgumentList "/x {52EC4366-FF56-4B08-817F-7797C72397A0} /qn"
 
             foreach($APP in $APPs)
             {
