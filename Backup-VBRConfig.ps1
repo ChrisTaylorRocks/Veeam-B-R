@@ -1,4 +1,4 @@
-﻿Function Backup-VBRConfig{  
+Function Backup-VBRConfig{  
     [CmdletBinding()]
     Param
     (
@@ -53,6 +53,11 @@
                 {
                     try
                     {
+                        #Check to make sure that $OutputPath exists if not create.
+                        if(-not (Test-Path $OutputPath))
+                        {
+                            New-Item -ItemType Directory -Force -Path $ConfigPath | Out-Null
+                        }
                         copy $Files[0] $OutputPath -Force
                     }
                     catch
