@@ -8,7 +8,7 @@ Function Backup-VBRConfig{
   
   Begin
   {
-    Log-Write -LogPath $sLogFile -LineValue "Backing up the current config."
+    Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Backing up the current config."
   }#End Begin
   
     Process{
@@ -23,7 +23,7 @@ Function Backup-VBRConfig{
                     if($ConfigBackupJob.LastState -eq 'Stopped')
                     {
                         #Run a backup
-                        Write-Output "Backing up the configuration."
+                        Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Backing up the configuration."
                         $RepositoryPath = Get-VBRConfigurationBackupJob | select -ExpandProperty repository | select -ExpandProperty Path
                         $BackupPath = $RepositoryPath + "\VeeamConfigBackup"    
         
@@ -31,7 +31,7 @@ Function Backup-VBRConfig{
                     } 
                     else
                     {
-                        Write-Output "A Configuration backup is already running. Waiting..."
+                        Write-LogInfo -LogPath $sLogFile -ToScreen -Message "A Configuration backup is already running. Waiting..."
                         while($ConfigBackupJob.LastState -ne 'Stopped')
                         {
                             $ConfigBackupJob = Get-VBRConfigurationBackupJob
@@ -43,10 +43,8 @@ Function Backup-VBRConfig{
                 $Files  = Get-ChildItem $BackupPath -Recurse -Include *.bco | sort $_.LastWriteTime -Descending
                 if ($($Files[0].LastWriteTime) -lt $((Get-Date).AddMinutes(-10)))
                 {
-                    Write-Output "There was an error backing up the config."
-                    Write-Output "The latest backup file was created on $($Files[0].LastWriteTime)"
-                    break 
-
+                     Write-LogError -LogPath $sLogFile -Message "There was an error backing up the config."
+                     Write-LogError -LogPath $sLogFile -ExitGracefully -Message "The latest backup file was created on $($Files[0].LastWriteTime)"
                 }
                 #Copy latest backup file
                 if ($OutputPath) 
@@ -62,15 +60,13 @@ Function Backup-VBRConfig{
                     }
                     catch
                     {
-                        Write-Output "There was an error copying the config. $Error[0]"
-                        break
+                        Write-LogError -LogPath $sLogFile -ExitGracefully -Message "There was an error copying the config. $Error[0]"
                     }    
                 }
                 }
                 Catch
                 {
-                    Write-Output "There was an error with the config backup. $($Error[0])"
-                    break
+                    Write-LogError -LogPath $sLogFile -ExitGracefully -Message "There was an error with the config backup. $($Error[0])"
                 }
             }
             else
@@ -78,28 +74,27 @@ Function Backup-VBRConfig{
                 #Not sure how to verify this in pre 9
                 try
                 {
-                    Write-Output "Backing up configuration."
+                    Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Backing up configuration."
                     Export-VBRConfiguration | Out-Null
                 }
                 catch
                 {
-                    Write-Output "There was an error with the config backup. $($Error[0])"
-                    break
+                    Write-LogError -LogPath $sLogFile -ExitGracefully -Message "There was an error with the config backup. $($Error[0])"
                 }
-                Write-Output "Config has been backed up."
+                Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Config has been backed up."
             }
         }#End Try
     
         Catch{
-          Log-Error -LogPath $sLogFile -ErrorDesc $_.Exception -ExitGracefully $True
+           Write-LogError -LogPath $sLogFile -ExitGracefully -Message "$_.Exception"
           Break
         }#End Catch
     }#End Process
   
   End{
     If($?){
-      Log-Write -LogPath $sLogFile -LineValue "Completed Successfully."
-      Log-Write -LogPath $sLogFile -LineValue " "
+      Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Completed Successfully."
+      Write-LogInfo -LogPath $sLogFile -ToScreen -Message " "
     }#End End
   }
 }#End Function Backup-VBRConfig
