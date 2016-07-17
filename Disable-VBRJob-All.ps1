@@ -4,7 +4,7 @@
     )
   
   Begin{
-    Log-Write -LogPath $sLogFile -LineValue "Disabling all Veeam jobs."
+    Write-LogInfo -LogPath $sLogFile -ToScreen -Message "Disabling all Veeam jobs."
   }#End Begin
   
   Process{
@@ -15,13 +15,12 @@
 
         if ($EnabledCountStart -gt 0)
         {
-            Write-Host "There are currently $EnabledCountStart enabled jobs."
-            Write-Host "Will wait for any running jobs."
+            Write-Output "There are currently $EnabledCountStart enabled jobs."
+            Write-Output "Will wait for any running jobs."
             Write-Output $EnabledJobs.Name
         }
 
         #If there are any enabled jobs disable them.
-
         while(Get-VBRJob | Where {$_.IsScheduleEnabled -eq $True})
         {
 
@@ -45,15 +44,14 @@
     }#End Try
     
     Catch{
-      Log-Error -LogPath $sLogFile -ErrorDesc $_.Exception -ExitGracefully $True
-      Break
+      Write-LogError -LogPath $sLogFile -ExitGracefully -Message "$_.Exception"
     }#End Catch
   }#End Process
   
   End{
     If($?){
-      Log-Write -LogPath $sLogFile -LineValue "All jobs have been disabled."
-      Log-Write -LogPath $sLogFile -LineValue " "
+      Write-LogInfo -LogPath $sLogFile -ToScreen -Message "All jobs have been disabled."
+      Write-LogInfo -LogPath $sLogFile -ToScreen -Message " "
     }#End End
   }
 }#End Function Disable-VBRJob-All
